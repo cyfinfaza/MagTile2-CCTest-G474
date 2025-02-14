@@ -31,8 +31,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define ADC_OVERSAMPLE 50
-#define ADC_BUFFER_SIZE 2*ADC_OVERSAMPLE
+//#define ADC_OVERSAMPLE 50
+//#define ADC_BUFFER_SIZE 2*ADC_OVERSAMPLE
 #define PID_I_CLAMP 0.1f
 /* USER CODE END PD */
 
@@ -52,11 +52,11 @@ TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN PV */
 
-volatile uint16_t adc_buffer[ADC_BUFFER_SIZE];
-float averaged_result;
+//volatile uint16_t adc_buffer[ADC_BUFFER_SIZE];
+//float averaged_result;
 float current_reading;
 float opamp_output;
-float current_setpoint = 0.3f;
+float current_setpoint = 0.190f;
 uint8_t ctrl_out = 0;
 volatile uint32_t adc_sample;
 volatile uint32_t temp_adc_sample;
@@ -68,8 +68,8 @@ float pid_error_integral = 0;
 float pid_pwm_change = 0;
 float pid_pwm_output = 0;
 
-const float Kp = 0.3f;
-const float Ki = 0.01f;
+float Kp = 0.1f;
+float Ki = 0.0035f;
 
 /* USER CODE END PV */
 
@@ -353,9 +353,9 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 16;
+  htim1.Init.Prescaler = 0;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 100;
+  htim1.Init.Period = 1600;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -602,6 +602,11 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 //	}
 //    HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, ctrl_out);
     // implement PID control
+	if (current_setpoint > 3 || current_reading > 3.2) {
+		TIM1->CCR1 = 0;
+		current_setpoint = 0;
+		return;
+	}
     pid_error = current_setpoint - current_reading;
     pid_error_integral += pid_error;
     // clamp integral to +- 10
@@ -612,12 +617,12 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 	}
     pid_pwm_change = Kp * pid_error + Ki * pid_error_integral;
     pid_pwm_output += pid_pwm_change;
-	if (pid_pwm_output > 0.995f) {
-		pid_pwm_output = 0.995f;
+	if (pid_pwm_output >= 0.98f) {
+		pid_pwm_output = 0.98f;
 	} else if (pid_pwm_output < 0.0f) {
 		pid_pwm_output = 0.0f;
 	}
-    TIM1->CCR1 = pid_pwm_output*100.0f;
+    TIM1->CCR1 = pid_pwm_output*1600.0f;
 }
 
 /* USER CODE END 4 */

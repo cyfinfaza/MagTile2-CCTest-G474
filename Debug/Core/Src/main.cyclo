@@ -8,5 +8,5 @@
 ../Core/Src/main.c:512:13:MX_TIM6_Init	3
 ../Core/Src/main.c:550:13:MX_GPIO_Init	1
 ../Core/Src/main.c:578:6:HAL_TIM_PeriodElapsedCallback	2
-../Core/Src/main.c:590:6:HAL_ADC_ConvCpltCallback	5
-../Core/Src/main.c:629:6:Error_Handler	1
+../Core/Src/main.c:590:6:HAL_ADC_ConvCpltCallback	7
+../Core/Src/main.c:634:6:Error_Handler	1
